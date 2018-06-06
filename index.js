@@ -6,30 +6,67 @@
 console.log('@binyaman has started........');
 
 
-// Dependancies
 const http = require('http');
 const url = require('url');
-
+const StringDecoder = require('string_decoder').StringDecoder;
 
 const server = http.createServer(function(req,res) {
 
-  // GET URL
   const parsedUrl = url.parse(req.url, true);
 
-  // PATH
   const path = parsedUrl.pathname;
   const trimmedPath = path.replace(/^\/+|\/+$/g, '');
+  const queryStringObject = parsedUrl.query;
   const method = req.method.toLowerCase();
+  const headers = req.headers;
 
-  // SEND response
-  res.end('Hello Binyamin\n');
+  const decoder  = new StringDecoder('utf-8');
+  let buffer = '';
+  req.on('data', function(data) {
+    buffer += decoder.write(data);
+  })
 
-  // Log the request
-  console.log(`Request received on path: ${trimmedPath} with method: ${method}`);
+  req.on('end',function(){
+    buffer += decoder.end();
 
+    const chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound
+
+    const data = {
+      'trimmedPath' : trimmedPath,
+      'queryStringObject' : queryStringObject,
+      'method' : method,
+      'headers' : headers,
+      'payload' : buffer
+    };
+
+    chosenHandler(data,function(statusCode, payload){
+      statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+      payload = typeof(payload) == 'object' ? payload : {}
+
+      const payloadString = JSON.stringify(payload);
+
+      res.writeHead(statusCode);
+      res.end(payloadString);
+      console.log('Returning this response: ', statusCode, payloadString );
+
+    });
+  });
 });
-
 
 server.listen(3000,function(){
   console.log('Listening on PORT 3000');
 });
+
+let handlers = {};
+
+handlers.sample = function(data,callback){
+  callback(406,{'name' : 'sample.handler'});
+}
+
+handlers.notFound = function(data,callback){
+  callback(404);
+}
+
+const router = {
+  'sample' : handlers.sample
+}
