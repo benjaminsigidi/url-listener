@@ -9,6 +9,7 @@ console.log('@binyaman has started........');
 const http = require('http');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
+const config = require('./config');
 
 const server = http.createServer(function(req,res) {
 
@@ -55,8 +56,8 @@ const server = http.createServer(function(req,res) {
   });
 });
 
-server.listen(3000,function(){
-  console.log('Listening on PORT 3000');
+server.listen(config.port,function(){
+  console.log(`Listening on PORT ${config.port} in ${config.envName} mode`);
 });
 
 let handlers = {};
