@@ -1,12 +1,14 @@
 let environments = {}
 
 environments.staging = {
-  'port' : 3000,
+  'httpPort' : 3000,
+  'httpPort' : 3001,
   'envName' : 'staging'
 };
 
 environments.production = {
-  'port' : 5000,
+  'httpsPort' : 5000,
+  'httpsPort' : 5001,
   'envName' : 'production'
 };
 
